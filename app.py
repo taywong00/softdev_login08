@@ -1,8 +1,8 @@
 '''
-Shannon Lau and Taylor Wong
+Charles Weng and Taylor Wong
 SoftDev1 Period 7
-HW #07: Do I Know You?
-2017-10-4
+HW #08?: 08_login
+2017-10-10
 '''
 
 from flask import Flask, render_template, redirect, url_for, session, request
@@ -39,9 +39,9 @@ def welcome():
             # Add username data to session
             session['uname'] = uname
             return render_template('welcome.html', USERNAME = uname)
-        else:
+        else: #incorrect pass
             return render_template('login.html', ERROR = 'Incorrect password.')
-    else:
+    else: #incorrect user
         return render_template('login.html', ERROR = 'Incorrect username.')
 
 # Log out procedure
