@@ -1,56 +1,68 @@
-'''
-Charles Weng and Taylor Wong
-SoftDev1 Period 7
-HW #08?: 08_login
-2017-10-10
-'''
-
-from flask import Flask, render_template, redirect, url_for, session, request
+from flask import Flask, render_template, session, url_for, redirect, request
 import os
 
-# Create flask app and establish secret_key
 app = Flask(__name__)
-
-#encrypts cookie values
 app.secret_key = os.urandom(32)
 
-accounts = {'hello':'world'}
 
-# Landing page
 @app.route("/")
-def hello_world():
-    # If not logged out, render welcome page
-    # Else, render login page
-    if 'uname' in session.keys():
-        return render_template('welcome.html', USERNAME = session['uname'])
-    else:
-        return render_template('login.html', ERROR = "")
+def root():
+    # check if logged in
+    if not 'loggedin?' in session:
+        session["loggedin?"] = False
 
-# Renders welcome or login page (with error)
-@app.route('/welcome')
+    if session['loggedin?']:
+        return redirect("/welcome")
+
+    # need user data
+    return render_template('form.html', text = 'Please enter your login')
+
+# get here through form.html
+@app.route("/login", methods = ["POST", "GET"])
+def login():
+    # check credentials
+    usercheck = False
+    passcheck = False
+    session["user"] = request.form.get("username")
+    if request.form.get("username") == "brown":
+            usercheck = True
+    if request.form.get("password") == "13":
+            passcheck = True
+
+    if (usercheck and passcheck):
+        session['loggedin?'] = True
+        return redirect("/welcome")
+    elif(usercheck and not passcheck):
+        return render_template('form.html', text = "wrong password")
+    elif(not usercheck and passcheck):
+        return render_template('form.html', text = "wrong username")
+    return render_template('form.html', text = "wrong username and password")
+
+
+@app.route("/welcome")
 def welcome():
-    form_dict = request.args
-    uname = form_dict['uname']
-    password = form_dict['password']
-    # Check for existing username
-    if uname in accounts.keys():
-        # Check for valid password
-        if (accounts[uname] == password):
-            # Add username data to session
-            session['uname'] = uname
-            return render_template('welcome.html', USERNAME = uname)
-        else: #incorrect pass
-            return render_template('login.html', ERROR = 'Incorrect password.')
-    else: #incorrect user
-        return render_template('login.html', ERROR = 'Incorrect username.')
+    return render_template("welcome.html", username = session['user'])
 
-# Log out procedure
-@app.route('/logout')
-def logout():
-    # Remove username data from session
-    if 'uname' in session:
-        session.pop('uname')
-    return render_template('login.html', ERROR = "")
+@app.route("/signout")
+def signout():
+    session.pop("user")
+    session.pop("loggedin?")
+    return redirect("/")
+
+def debug():
+    print "\n\n\n"
+    print "session:"
+    print session
+    print "app:"
+    print app
+    print "\nrequest.headers:"
+    print request.headers
+    print "\nrequest.method:"
+    print request.method
+    print "\nrequest.args:"
+    print request.args
+    print "\nrequest.form:"
+    print request.form
 
 if __name__ == "__main__":
     app.debug = True
