@@ -68,6 +68,7 @@ def signout():
     # go back to root
     return redirect("/")
 
+# debug statements
 def debug():
     print "\n\n\n"
     print "session:"
